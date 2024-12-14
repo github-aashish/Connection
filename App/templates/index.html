@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+{% load followCheck %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script> {% endcomment %}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Connection</title>
+</head>
+
+<body>
+    
+    <div class="grid-container">
+        <header>
+            <button class="save" onclick="window.location.href='saved';"><i class="fa-regular fa-bookmark"></i> Saved</button>
+            <button class="search" onclick="window.location.href='search';"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+            <button type="button" class="publish" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <i class="fa-regular fa-paper-plane" ></i> Publish Post</button>
+        </header>
+        <!-- Modal-->
+
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="createpost" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+        <div class="modal-body">
+            <p>
+                <input type="file" multiple name="pimages" >
+            </p>
+            <p>
+                <textarea name="content" required rows="5" style="width:100%;" placeholder="Type Content (Press Shift+Enter for New Line)"></textarea>
+            </p>
+          
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Submit</button>
+        </div>
+    </form>
+      </div>
+    </div>
+  </div>
+
+<!--SideBar-->
+        
+        <div class="side">
+            <div class="logo">
+                <img src="{% static 'images/connection2.png' %}" alt="">
+            </div>
+            <div class="navigation">
+                <a href="index"><i class="fa-solid fa-house"></i>Home</a>
+                <a href="profile/{{user.username}}"><i class="fa-solid fa-user"></i>Profile</a>
+                <a href="notification"><i class="fa-solid fa-bell"></i>Notifications
+                    {% if notification.status %}
+                    <span class="noti-light"></span>
+                    {% endif%}
+                </a>
+                <a href="messaging"><i class="fa-brands fa-rocketchat"></i>Messages</a>
+                <a href="/connections"><i class="fa-solid fa-handshake"></i>Connections</a>
+                <a href="logout"><i class="fa-solid fa-door-open"></i>Logout</a>
+            </div>
+            <div class="log-user">
+                <img src="media/{{user.pimage}}" alt="Profile Image">
+                <a href="/profile/{{user.username}}">@{{ user.username}}</a>
+            </div>
+        </div>
+
+        
+        <!--Posts-->
+        <div class="posts">
+            {% for post in posts %}
+            <div class="post" data-post_id="{{post.id}}">
+                    <div class="user">
+                        <img src="media/{{post.user.pimage}}" alt="{{post.user.username}}" onclick="window.location.href='profile/{{post.user.username}}'">
+                            <span style="font-weight:bold;font-size:16px;" onclick="window.location.href='profile/{{post.user.username}}'">{{post.user.firstname}} {{post.user.lastname}}</span>
+                            <span style="font-size:14px;margin:0 8px;" onclick="window.location.href='profile/{{post.user.username}}'">@{{ post.user.username }}</span>
+                        <span>{{post.date_created | date:"P M d Y"}}</span>
+                        {% if post.user == user %}
+                        <button>Action</button>
+                        {% else %}
+                                {% if post.user|check:user %}
+                                <button onclick="unfollow_user(this,'{{post.user.username}}', 'connections')" data-username={{post.user.username}}>Connected</button>
+                                {% else %}
+                                <button onclick="follow_user(this,'{{post.user.username}}','suggest')"; data-username={{post.user.username}}>Connect +</button>
+                                {% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="content">
+                            {{ post.content | linebreaksbr}}
+                    </div>
+                {% with media_files=post.media_post.all %}
+                    {% if media_files.count > 1 %}
+                        {% comment %} <div class="slider"> {% endcomment %}
+                            <div class="slider-media" data-current="0" data-slidesNo={{media_files.count}} onload="makeSlides(this)">
+                            {% for media in media_files %}
+                                <div class="slide">
+                                    {% if media.is_video %}
+                                        <video controls autoplay muted disablepictureinpicture controlslist="nofullscreen nodownload noremoteplayback noplaybackrate foobar">
+                                            <source src="{{ media.media.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                        </video>
+                                    {% else %}
+                                        <img src="{{ media.media.url}}" alt="Post">
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            <button class="prev" onclick="goPrev(this)";>P</button>
+                            <button class="next" onclick="goNext(this)">N</button>
+                        </div>
+                        {% comment %} </div> {% endcomment %}
+                    {% else %}
+                        <div class="media">
+                            {% if media_files.first.is_video %}
+                                        <video controls autoplay muted disablepictureinpicture controlslist="nofullscreen nodownload noremoteplayback noplaybackrate foobar">
+                                            <source src="{{ media_files.first.media.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                        </video>
+                                    {% else %}
+                            <img src="{{ media_files.first.media.url}}" alt="Post">
+                            {% endif %}
+                        </div>
+                {% endif %}
+                {% endwith %}
+                
+                <div class="actions">
+                    {% if user in post.likers.all %}
+                    <div class="like" onclick="unlike_post(this)" data-post_id="{{post.id}}">
+                            <div class="svg-span">
+                                <svg width="2em" height="2em" viewBox="0 -1 16 16" class="bi bi-heart-fill" fill="#e0245e" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                                </svg>
+                            </div>
+                        <p class="likes_count">{{post.likers.count}}</p>
+                    </div>
+                    {% else %}
+                        <div class="like" onclick="like_post(this)" data-post_id="{{post.id}}">
+                            <div class="svg-span">
+                                <svg class="liked" width="1.1em" height="1.1em" viewBox="0 -1 16 16" class="bi bi-heart" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M8 2.748l-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                </svg>
+                            </div>
+                            <p class="likes_count">{{post.likers.count}}</p>
+                        </div>
+                    {% endif%}
+                        <div class="comment" onclick="show_comment(this)" data-post_id="{{post.id}}">
+                            <svg width="2em" height="2em" viewBox="0 0 16 16" class="bi bi-chat" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M2.678 11.894a1 1 0 0 1 .287.801 10.97 10.97 0 0 1-.398 2c1.395-.323 2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8.06 8.06 0 0 0 8 14c3.996 0 7-2.807 7-6 0-3.192-3.004-6-7-6S1 4.808 1 8c0 1.468.617 2.83 1.678 3.894zm-.493 3.905a21.682 21.682 0 0 1-.713.129c-.2.032-.352-.176-.273-.362a9.68 9.68 0 0 0 .244-.637l.003-.01c.248-.72.45-1.548.524-2.319C.743 11.37 0 9.76 0 8c0-3.866 3.582-7 8-7s8 3.134 8 7-3.582 7-8 7a9.06 9.06 0 0 1-2.347-.306c-.52.263-1.639.742-3.468 1.105z"/>
+                            </svg>
+                            <p id="comment-count">{{post.comment_count}}</p>
+                        </div>
+
+                {% if user not in post.savers.all %}
+                        <div class="saved" onclick="save_post(this)" data-post_id="{{post.id}}">
+                            <div class="saved-span">
+                                <svg width="2em"  height="2em" viewBox="0.5 0 15 15" class="bi bi-bookmark" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M8 12l5 3V3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12l5-3zm-4 1.234l4-2.4 4 2.4V3a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10.234z"/>
+                                </svg>  
+                                <p>Save</p>
+                            </div>
+                        </div>
+
+                {% else %}
+
+                        <div class="saved" onclick="unsave_post(this)" data-post_id="{{post.id}}">
+                            <div class="saved-span" >  
+                                <svg width="2em" height="2em" viewBox="0.5 0 15 15" class="bi bi-bookmark-fill" fill="#17bf63" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M3 3a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v12l-5-3-5 3V3z"/>
+                                </svg> 
+                                <p>UnSave</p>
+                            </div>
+                        </div>
+
+                {% endif %}                    
+                </div>
+                
+                <!--Comments-->
+
+                <div class="comment-div" style="display: none;" id="demo">
+                    <div class="spinner-div">
+                        <img src="{% static 'images/spinner.gif' %}" id="spinner" height="100px">
+                    </div>
+                        <div class="comment-div-data" style="display: none;">
+                            <div class="head-comment-input">
+                                <div class="input-img">
+                                    {% comment %} <a href="{% url 'profile' user.username %}"> {% endcomment %}
+                                        <a href="profile">
+                                        {% comment %} <div class="small-profilepic" style="background-image: url(/media/{{user.profile_pic}})"></div> {% endcomment %}
+                                            <img src="media/{{user.pimage}}" alt="Profile Picture">
+                                    </a>
+                                </div>
+                                <div class="input-text">
+                                    <div class="comment-input-div">
+                                        <form class="comment-form" onsubmit="return write_comment(this)">
+                                            <input type="text" name="comment" class="comment-input" placeholder="Write a comment...">
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comment-comments" id="comment-comments"></div>
+                        </div>
+                </div>
+
+                <!--Comments-->
+
+
+            </div>
+            {% endfor %}
+        </div>
+
+
+
+
+
+        <!--Suggestions Menu-->
+        <div class="suggest">
+            <h3 style="padding:10px 25px;">People You Might Know</h3>
+            {% for suggest in suggestions %}
+            <div class="users">
+                <div class="suggest-media">
+                <img src="media/{{suggest.pimage}}" alt="{{ suggest.username }}" onclick="window.location.href='profile/{{suggest.username}}'">
+                <h5 onclick="window.location.href='profile/{{suggest.username}}'">{{ suggest.firstname }} {{suggest.lastname}}<br/>
+                    <span>@{{ suggest.username }}</span>
+                </h5>
+                </div>
+                <button onclick="follow_user(this,'{{suggest.username}}','suggest')"; data-username={{suggest.username}}>Connect + </button>
+            </div>
+            {% endfor %}
+            <hr>
+            <button class="more">
+                Show More
+            </button>
+        </div>
+        
+    </div>
+    
+    <div id="cursor"></div>
+    {% comment %} <div id="cursor-blur"></div> {% endcomment %}
+    <script src="{% static 'js/index.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+    <script src="{% static 'js/slider.js' %}"></script>
+</body>
+
+</html>

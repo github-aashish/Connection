@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="{% static 'js/script.js' %}"></script>
+    <title>Sign Up</title>
+</head>
+
+<body>
+{% comment %} <div class="background"></div> {% endcomment %}
+<div class="login-section">
+    <div class="section-banner">
+    </div>
+    <div class="login-main">
+        <form action="signup" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="shape1"></div>
+                <div class="shape2"></div>
+                <div class="blur-effect"></div>
+                <h1>Sign Up</h1>
+            <fieldset>
+                <legend>First Name</legend>
+                <input type="text" placeholder="First Name*" name="fname" required>
+            </fieldset>
+            <fieldset>
+                <legend>Last Name</legend>
+                <input type="text" placeholder="Last Name*" name="lname" required>
+            </fieldset>
+            <fieldset>
+                <legend>Uname</legend>
+                <input type="text" placeholder="User Name*" name="uname" onkeyup="checkUser(this)" required>
+            </fieldset>
+            <fieldset>
+                <legend>Email</legend>
+                <input type="email" placeholder="Email*" name="uemail" required>
+            </fieldset>
+            <fieldset>
+                <legend>Profile Image</legend>
+                <input type="file" name="profile" required>
+            </fieldset>
+            <fieldset>
+                <legend>Password</legend>
+                <input type="password" placeholder="AlphaNumeric Password*" onkeyup="checkPassword(this)" name="upassword" required>
+            </fieldset>
+            <p style="text-align:center;">
+                <input type="submit" id="sbmtbtn" disabled value="SignUp">
+            </p>
+            <p><a href="{% url 'login' %}">Already have an account? Login</a></p>
+        </form>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+
+    <script>
+        {% if messages %}
+            {% for message in messages %}
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Signup Failed',
+                    text: '{{ message }}',
+                });
+            {% endfor %}
+        {% endif %}
+    </script>
+</body>
+
+</html>
